@@ -1,214 +1,371 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-<title>Door Check-in — Show Magnifique</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#111111">
+<title>Door Check-in — The Pink Effect Awards</title>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
+:root {
+  --ink:#111111;
+  --paper:#f4f2ee;
+  --card:#ffffff;
+  --muted:#77736e;
+  --line:#dedad4;
+  --blush:#e8c8cf;
+  --rose:#b36a7c;
+  --wine:#68182c;
+  --gold:#b79a70;
+  --success:#24734a;
+  --warning:#a7731d;
+  --error:#a33a3a;
+}
 * { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:'Helvetica Neue',sans-serif; background:#0f0510; color:#FAF7F2; min-height:100vh; }
-.wrap { max-width:440px; margin:0 auto; padding:28px 20px 40px; }
-.header { text-align:center; margin-bottom:24px; }
-.logo { font-size:11px; letter-spacing:3px; color:#B8860B; text-transform:uppercase; margin-bottom:6px; }
-h1 { font-size:20px; font-weight:400; margin-bottom:4px; }
-.sub { font-size:12px; color:#8a7a6a; }
-.stats { background:#1a0a0a; border-radius:12px; padding:16px 20px; margin-bottom:20px; }
-.stats-title { font-size:10px; letter-spacing:2px; color:#B8860B; text-transform:uppercase; margin-bottom:12px; }
-.stat-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #2a1010; font-size:13px; }
-.stat-row:last-child { border-bottom:none; font-weight:600; font-size:14px; }
-.stat-num { color:#B8860B; font-weight:600; }
-.scanner-box { background:#1a0a0a; border-radius:12px; padding:20px; margin-bottom:20px; }
-.scanner-title { font-size:10px; letter-spacing:2px; color:#B8860B; text-transform:uppercase; margin-bottom:16px; text-align:center; }
-#reader { width:100%; border-radius:8px; overflow:hidden; }
-#reader video { border-radius:8px; }
-.scan-btn { width:100%; padding:14px; border-radius:8px; border:none; background:#B8860B; color:#1a0a0a; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px; margin-bottom:12px; }
-.scan-btn.stop { background:#2a1010; color:#B8860B; border:1px solid #B8860B; }
-.divider { display:flex; align-items:center; gap:10px; margin:16px 0; }
-.divider span { font-size:11px; color:#5a4a3a; white-space:nowrap; }
-.divider::before, .divider::after { content:''; flex:1; height:1px; background:#2a1010; }
-.manual-label { font-size:10px; letter-spacing:2px; color:#8a7a6a; text-transform:uppercase; margin-bottom:10px; text-align:center; }
-input[type=text] { width:100%; padding:13px; border-radius:8px; border:1px solid #3a2010; background:#0f0510; color:#FAF7F2; font-size:15px; text-align:center; letter-spacing:2px; }
-input[type=text]::placeholder { color:#5a4a3a; letter-spacing:1px; font-size:13px; }
-input[type=text]:focus { outline:none; border-color:#B8860B; }
-.manual-btn { width:100%; margin-top:10px; padding:13px; border-radius:8px; border:none; background:#8B1C1C; color:#FAF7F2; font-size:15px; font-weight:600; cursor:pointer; }
-.status-msg { text-align:center; font-size:13px; color:#8a7a6a; margin-top:12px; min-height:20px; }
-.status-msg.scanning { color:#B8860B; }
-.status-msg.error { color:#8B1C1C; }
-.result-box { display:none; border-radius:12px; padding:28px 24px; margin-bottom:20px; text-align:center; border:2px solid #1a7a3a; background:#0a1f0e; }
-.result-box.warning { border-color:#B8860B; background:#1a1200; }
-.result-box.error-box { border-color:#8B1C1C; background:#1a0505; }
-.result-icon { font-size:48px; margin-bottom:10px; line-height:1; }
-.result-status { font-size:20px; font-weight:700; margin-bottom:6px; }
-.result-guest { font-size:15px; color:#FAF7F2; margin-top:4px; }
-.result-label { font-size:12px; color:#8a7a6a; }
-.refresh-link { display:block; text-align:center; margin-top:16px; font-size:12px; color:#5a4a3a; cursor:pointer; }
+html { background:var(--ink); }
+body {
+  min-height:100vh;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(232,200,207,.42), transparent 32%),
+    linear-gradient(180deg,#f8f6f2 0%,#efebe5 100%);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,input { font:inherit; }
+button { -webkit-tap-highlight-color:transparent; }
+.wrap { width:min(100%,480px); margin:0 auto; padding:28px 18px 44px; }
+.topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; }
+.brand { font-size:10px; line-height:1.4; letter-spacing:2.3px; text-transform:uppercase; font-weight:650; }
+.connection { display:flex; align-items:center; gap:7px; color:var(--muted); font-size:11px; }
+.dot { width:7px; height:7px; border-radius:50%; background:var(--warning); box-shadow:0 0 0 4px rgba(167,115,29,.12); }
+.dot.online { background:var(--success); box-shadow:0 0 0 4px rgba(36,115,74,.12); }
+.dot.offline { background:var(--error); box-shadow:0 0 0 4px rgba(163,58,58,.12); }
+.hero { margin-bottom:24px; }
+.eyebrow { color:var(--rose); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
+h1 { font-family:Georgia,"Times New Roman",serif; font-size:39px; line-height:1.02; font-weight:400; letter-spacing:-1.2px; }
+.sub { margin-top:11px; color:var(--muted); font-size:13px; line-height:1.6; }
+.card { background:rgba(255,255,255,.9); border:1px solid rgba(17,17,17,.07); border-radius:22px; box-shadow:0 15px 50px rgba(17,17,17,.08); backdrop-filter:blur(18px); }
+.stats { padding:20px; margin-bottom:16px; }
+.section-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.section-title { font-size:11px; letter-spacing:1.8px; text-transform:uppercase; font-weight:750; }
+.refresh-mini { border:0; background:transparent; color:var(--muted); cursor:pointer; font-size:12px; padding:5px; }
+.total { display:flex; align-items:flex-end; justify-content:space-between; padding-bottom:18px; border-bottom:1px solid var(--line); }
+.total-label { color:var(--muted); font-size:12px; }
+.total-number { font-size:34px; line-height:1; font-weight:600; letter-spacing:-1.6px; }
+.total-denom { color:var(--muted); font-size:14px; font-weight:450; letter-spacing:0; }
+.progress { height:4px; border-radius:99px; overflow:hidden; background:#e8e4df; margin-top:12px; }
+.progress > span { display:block; height:100%; width:0; background:var(--ink); border-radius:inherit; transition:width .4s ease; }
+.stat-list { margin-top:10px; }
+.stat-row { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; padding:11px 0; border-bottom:1px solid #ede9e4; }
+.stat-row:last-child { border-bottom:0; padding-bottom:0; }
+.stat-name { font-size:13px; }
+.stat-num { font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; }
+.result-box { display:none; padding:25px 20px; margin-bottom:16px; text-align:center; animation:rise .24s ease; }
+@keyframes rise { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:none; } }
+.result-icon { width:54px; height:54px; border-radius:50%; display:grid; place-items:center; margin:0 auto 13px; font-size:25px; font-weight:700; }
+.result-status { font-family:Georgia,"Times New Roman",serif; font-size:25px; line-height:1.1; }
+.result-guest { font-size:15px; font-weight:650; margin-top:8px; }
+.result-meta { color:var(--muted); font-size:12px; line-height:1.5; margin-top:6px; }
+.result-box.success .result-icon { color:#fff; background:var(--success); }
+.result-box.warning .result-icon { color:#fff; background:var(--warning); }
+.result-box.error .result-icon { color:#fff; background:var(--error); }
+.scanner { padding:20px; }
+.scanner-title { font-size:11px; letter-spacing:1.8px; text-transform:uppercase; font-weight:750; margin-bottom:15px; }
+#reader { width:100%; overflow:hidden; border-radius:16px; background:#111; }
+#reader video { border-radius:16px; }
+#reader__dashboard_section_csr button { border:0!important; border-radius:9px!important; padding:9px 12px!important; }
+.primary-btn,.secondary-btn { width:100%; border:0; border-radius:14px; padding:15px 16px; cursor:pointer; font-weight:700; transition:transform .12s ease,opacity .12s ease; }
+.primary-btn:active,.secondary-btn:active { transform:scale(.985); }
+.primary-btn { margin-top:13px; background:var(--ink); color:white; }
+.primary-btn.stop { background:#fff; color:var(--ink); border:1px solid var(--line); }
+.status-msg { min-height:18px; text-align:center; margin-top:10px; color:var(--muted); font-size:12px; }
+.status-msg.error { color:var(--error); }
+.divider { display:flex; align-items:center; gap:10px; margin:19px 0; color:#aaa49d; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; }
+.divider::before,.divider::after { content:""; flex:1; height:1px; background:var(--line); }
+.field-label { display:block; margin:0 0 8px; color:var(--muted); font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+.input { width:100%; border:1px solid var(--line); border-radius:13px; background:#faf9f7; color:var(--ink); padding:14px; outline:none; transition:border-color .15s ease,box-shadow .15s ease; }
+.input:focus { border-color:#aaa39b; box-shadow:0 0 0 4px rgba(17,17,17,.05); }
+#manualUID { text-align:center; text-transform:uppercase; letter-spacing:1.4px; font-weight:650; }
+.staff-wrap { margin-bottom:12px; }
+.secondary-btn { margin-top:10px; background:var(--wine); color:#fff; }
+.footer { text-align:center; margin-top:20px; color:#928d87; font-size:10px; letter-spacing:.4px; }
+.busy { pointer-events:none; opacity:.58; }
+@media (max-width:370px) { h1{font-size:34px}.wrap{padding-left:14px;padding-right:14px} }
 </style>
 </head>
 <body>
 <div class="wrap">
-
-  <div class="header">
-    <p class="logo">Paris Corner × Intense Oud</p>
-    <h1>Door Check-in</h1>
-    <p class="sub">The Show Magnifique · Friday, June 19, 2026</p>
+  <div class="topbar">
+    <div class="brand">Ard Al Zaafran<br>× Intense Oud</div>
+    <div class="connection"><span class="dot" id="connectionDot"></span><span id="connectionText">Connecting</span></div>
   </div>
 
-  <div class="stats">
-    <div class="stats-title">Live Attendance</div>
-    <div class="stat-row"><span>Creators & Affiliates</span><span class="stat-num" id="s-aff">Loading...</span></div>
-    <div class="stat-row"><span>General Public</span><span class="stat-num" id="s-gen">Loading...</span></div>
-    <div class="stat-row"><span>Trade Partners</span><span class="stat-num" id="s-b2b">Loading...</span></div>
-    <div class="stat-row"><span>Total Arrived</span><span class="stat-num" id="s-total">Loading...</span></div>
-  </div>
+  <header class="hero">
+    <p class="eyebrow">Staff access</p>
+    <h1>Door<br>Check-in</h1>
+    <p class="sub">The Pink Effect Awards · Thursday, July 30, 2026 · 7:00 PM</p>
+  </header>
 
-  <div class="result-box" id="resultBox">
+  <section class="card stats">
+    <div class="section-head">
+      <span class="section-title">Live attendance</span>
+      <button type="button" class="refresh-mini" onclick="loadStats()">Refresh ↻</button>
+    </div>
+    <div class="total">
+      <div><div class="total-label">People arrived</div><div class="progress"><span id="progressBar"></span></div></div>
+      <div class="total-number"><span id="totalArrived">—</span><span class="total-denom"> / <span id="totalApproved">—</span></span></div>
+    </div>
+    <div class="stat-list">
+      <div class="stat-row"><span class="stat-name">Shopify RSVPs</span><span class="stat-num" id="s-shopify">—</span></div>
+      <div class="stat-row"><span class="stat-name">Employees & guests</span><span class="stat-num" id="s-employees">—</span></div>
+      <div class="stat-row"><span class="stat-name">B2B partners</span><span class="stat-num" id="s-b2b">—</span></div>
+      <div class="stat-row"><span class="stat-name">Meta RSVPs</span><span class="stat-num" id="s-meta">—</span></div>
+    </div>
+  </section>
+
+  <section class="card result-box" id="resultBox" aria-live="polite">
     <div class="result-icon" id="resultIcon"></div>
     <div class="result-status" id="resultStatus"></div>
     <div class="result-guest" id="resultGuest"></div>
-    <div class="result-label" id="resultLabel"></div>
-  </div>
+    <div class="result-meta" id="resultMeta"></div>
+  </section>
 
-  <div class="scanner-box">
-    <div class="scanner-title">Scan Guest QR Code</div>
+  <section class="card scanner" id="scannerCard">
+    <div class="scanner-title">Scan guest pass</div>
     <div id="reader"></div>
-    <button class="scan-btn" id="startBtn" onclick="startScanner()">Open Camera & Scan</button>
+    <button type="button" class="primary-btn" id="startBtn" onclick="startScanner()">Open camera & scan</button>
     <div class="status-msg" id="statusMsg"></div>
-    <div class="divider"><span>or enter manually</span></div>
-    <div class="manual-label">Type UID</div>
-    <input type="text" id="manualUID" placeholder="SM2026-X-XXXXXXXX"
-      autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" />
-    <button class="manual-btn" onclick="submitManual()">Check In</button>
-  </div>
 
-  <span class="refresh-link" onclick="loadStats()">↻ Refresh attendance counts</span>
+    <div class="divider">or enter manually</div>
 
+    <div class="staff-wrap">
+      <label class="field-label" for="staffName">Checked in by</label>
+      <input class="input" type="text" id="staffName" placeholder="Staff name" autocomplete="name">
+    </div>
+
+    <label class="field-label" for="manualUID">Guest UID</label>
+    <input class="input" type="text" id="manualUID" placeholder="PE2026-SHOP-12-XXXXXXXXXX" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+    <button type="button" class="secondary-btn" id="manualBtn" onclick="submitManual()">Check in guest</button>
+  </section>
+
+  <div class="footer">Private staff tool · Do not share this page publicly</div>
 </div>
 
 <script>
-  // ============================================================
-  // REPLACE THIS WITH YOUR APPS SCRIPT WEB APP URL
-  // ============================================================
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwyt32XCSlHTrlA-uykJOSn_yRNCB9LoADF5uek21CAq0KPSESGyOkKUB1NYaL3TPu/exec";
+// ============================================================
+// CONFIGURATION
+// ============================================================
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwyt32XCSlHTrlA-uykJOSn_yRNCB9LoADF5uek21CAq0KPSESGyOkKUB1NYaL3TPu/exec";
 
-  let html5QrCode = null;
-  let scanning    = false;
+// Must match CONFIG.CHECKIN_SECRET in Apps Script. Leave both blank if unused.
+const CHECKIN_SECRET = "";
 
-  window.onload = function() { loadStats(); };
+const SOURCE_IDS = {
+  "RSVPs": "s-shopify",
+  "Employees": "s-employees",
+  "B2B Partners": "s-b2b",
+  "META RSVPs": "s-meta"
+};
 
-  function loadStats() {
-    document.getElementById('s-aff').textContent   = "Loading...";
-    document.getElementById('s-gen').textContent   = "Loading...";
-    document.getElementById('s-b2b').textContent   = "Loading...";
-    document.getElementById('s-total').textContent = "Loading...";
+let html5QrCode = null;
+let scanning = false;
+let checkingIn = false;
+let resultTimer = null;
 
-    fetch(APPS_SCRIPT_URL + "?action=stats")
-      .then(r => r.json())
-      .then(data => {
-        document.getElementById('s-aff').textContent   = data.AFFILIATE.arrived + " / " + data.AFFILIATE.total;
-        document.getElementById('s-gen').textContent   = data.GENERAL.arrived   + " / " + data.GENERAL.total;
-        document.getElementById('s-b2b').textContent   = data.B2B.arrived       + " / " + data.B2B.total;
-        const ta = data.AFFILIATE.arrived + data.GENERAL.arrived + data.B2B.arrived;
-        const tt = data.AFFILIATE.total   + data.GENERAL.total   + data.B2B.total;
-        document.getElementById('s-total').textContent = ta + " / " + tt;
-      })
-      .catch(() => {
-        document.getElementById('s-total').textContent = "Error loading";
-      });
+window.addEventListener("load", () => {
+  const savedStaff = localStorage.getItem("pinkEffectStaffName") || "";
+  document.getElementById("staffName").value = savedStaff;
+  document.getElementById("staffName").addEventListener("change", saveStaffName);
+  document.getElementById("manualUID").addEventListener("keydown", event => {
+    if (event.key === "Enter") submitManual();
+  });
+  loadStats();
+  setInterval(loadStats, 30000);
+});
+
+function saveStaffName() {
+  localStorage.setItem("pinkEffectStaffName", document.getElementById("staffName").value.trim());
+}
+
+function buildUrl(params) {
+  const url = new URL(APPS_SCRIPT_URL);
+  Object.entries(params || {}).forEach(([key,value]) => {
+    if (value !== "" && value !== null && value !== undefined) url.searchParams.set(key,value);
+  });
+  if (CHECKIN_SECRET) url.searchParams.set("key",CHECKIN_SECRET);
+  url.searchParams.set("_",Date.now().toString());
+  return url.toString();
+}
+
+async function fetchJson(url) {
+  const response = await fetch(url,{ method:"GET", cache:"no-store", redirect:"follow" });
+  const text = await response.text();
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  try { return JSON.parse(text); }
+  catch (error) {
+    throw new Error("The Apps Script endpoint returned HTML instead of JSON. Deploy the matching backend update.");
+  }
+}
+
+function setConnection(state,text) {
+  const dot = document.getElementById("connectionDot");
+  dot.className = "dot " + state;
+  document.getElementById("connectionText").textContent = text;
+}
+
+async function loadStats() {
+  try {
+    const data = await fetchJson(buildUrl({ action:"stats" }));
+    const sources = data.sources || {};
+    Object.entries(SOURCE_IDS).forEach(([sourceName,id]) => {
+      const source = sources[sourceName] || {};
+      document.getElementById(id).textContent = `${Number(source.arrivedPeople || 0)} / ${Number(source.approvedPeople || 0)}`;
+    });
+
+    const arrived = Number(data.totalArrivedPeople || 0);
+    const approved = Number(data.totalApprovedPeople || 0);
+    document.getElementById("totalArrived").textContent = arrived;
+    document.getElementById("totalApproved").textContent = approved;
+    document.getElementById("progressBar").style.width = (approved ? Math.min(100,(arrived / approved) * 100) : 0) + "%";
+    setConnection("online","Live");
+  } catch (error) {
+    console.error(error);
+    setConnection("offline","Offline");
+  }
+}
+
+async function checkIn(rawUid) {
+  if (checkingIn) return;
+  const uid = extractUid(rawUid);
+  if (!uid) {
+    showResult("error","Invalid pass","The scanned code does not contain a valid Pink Effect UID.",null);
+    return;
   }
 
-  function checkIn(uid) {
-    if (!uid) return;
-    uid = uid.trim().toUpperCase();
-    fetch(APPS_SCRIPT_URL + "?action=checkin&uid=" + encodeURIComponent(uid))
-      .then(r => r.json())
-      .then(data => {
-        showResult(data.status, data.message, data.guest);
-        loadStats();
-      })
-      .catch(() => showResult("error", "Connection error. Try again.", ""));
+  checkingIn = true;
+  setBusy(true);
+  document.getElementById("statusMsg").textContent = "Verifying pass…";
+
+  try {
+    const staff = document.getElementById("staffName").value.trim() || "Door Team";
+    saveStaffName();
+    const data = await fetchJson(buildUrl({ action:"checkin", uid, staff }));
+    showResult(data.status || "error",data.title || data.message || "Check-in result",data.message || "",data.guest || null,data);
+    await loadStats();
+  } catch (error) {
+    console.error(error);
+    showResult("error","Connection error",error.message || "Please try again.",null);
+  } finally {
+    checkingIn = false;
+    setBusy(false);
+    document.getElementById("statusMsg").textContent = "";
   }
+}
 
-  function showResult(status, message, guest) {
-    const box    = document.getElementById('resultBox');
-    const icon   = document.getElementById('resultIcon');
-    const stat   = document.getElementById('resultStatus');
-    const gname  = document.getElementById('resultGuest');
-    const glabel = document.getElementById('resultLabel');
+function extractUid(value) {
+  let text = String(value || "").trim();
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed && parsed.uid) text = String(parsed.uid);
+  } catch (_) {}
+  try {
+    const url = new URL(text);
+    if (url.searchParams.get("uid")) text = url.searchParams.get("uid");
+  } catch (_) {}
+  const match = text.toUpperCase().match(/PE2026-[A-Z0-9]+-\d+-[A-Z0-9]+/);
+  return match ? match[0] : "";
+}
 
-    box.className = "result-box";
-    if (status === "warning") box.classList.add("warning");
-    if (status === "error")   box.classList.add("error-box");
-    box.style.display = "block";
+function guestName(guest) {
+  if (!guest) return "";
+  if (typeof guest === "string") return guest;
+  return guest.name || guest.fullName || "";
+}
 
-    const color = status === "success" ? "#1a7a3a" : status === "warning" ? "#B8860B" : "#8B1C1C";
-    icon.textContent   = status === "success" ? "✓" : status === "warning" ? "⚠" : "✗";
-    icon.style.color   = color;
-    stat.textContent   = message;
-    stat.style.color   = color;
-    gname.textContent  = guest || "";
-    glabel.textContent = guest ? "Guest" : "";
+function showResult(status,title,message,guest,extra) {
+  const box = document.getElementById("resultBox");
+  const normalized = status === "success" ? "success" : status === "warning" ? "warning" : "error";
+  box.className = `card result-box ${normalized}`;
+  box.style.display = "block";
+  document.getElementById("resultIcon").textContent = normalized === "success" ? "✓" : normalized === "warning" ? "!" : "×";
+  document.getElementById("resultStatus").textContent = title || (normalized === "success" ? "Welcome" : "Check-in issue");
+  document.getElementById("resultGuest").textContent = guestName(guest);
 
-    setTimeout(() => {
-      box.style.display = "none";
-    }, 5000);
-  }
+  const party = Number((extra && extra.partySize) || (guest && guest.partySize) || 0);
+  const detailParts = [];
+  if (message) detailParts.push(message);
+  if (party > 1) detailParts.push(`Party of ${party}`);
+  if (guest && guest.sourceLabel) detailParts.push(guest.sourceLabel);
+  document.getElementById("resultMeta").textContent = detailParts.join(" · ");
 
-  function submitManual() {
-    const uid = document.getElementById('manualUID').value;
-    if (!uid.trim()) return;
-    checkIn(uid);
-    document.getElementById('manualUID').value = "";
-  }
+  clearTimeout(resultTimer);
+  resultTimer = setTimeout(() => { box.style.display = "none"; },8000);
+  box.scrollIntoView({ behavior:"smooth",block:"nearest" });
+}
 
-  function startScanner() {
-    if (scanning) { stopScanner(); return; }
+function submitManual() {
+  const input = document.getElementById("manualUID");
+  if (!input.value.trim()) return;
+  const value = input.value;
+  input.value = "";
+  checkIn(value);
+}
 
-    const btn = document.getElementById('startBtn');
-    const msg = document.getElementById('statusMsg');
-    btn.textContent = 'Stop Camera';
-    btn.classList.add('stop');
-    msg.textContent = 'Point camera at guest QR code...';
-    msg.className   = 'status-msg scanning';
+function setBusy(busy) {
+  document.getElementById("scannerCard").classList.toggle("busy",busy);
+  document.getElementById("manualBtn").disabled = busy;
+}
 
-    html5QrCode = new Html5Qrcode("reader");
-    scanning    = true;
+async function startScanner() {
+  if (scanning) { await stopScanner(); return; }
 
-    html5QrCode.start(
-      { facingMode: "environment" },
-      { fps:10, qrbox:{ width:250, height:250 }, aspectRatio:1.0, showTorchButtonIfSupported:true },
+  const btn = document.getElementById("startBtn");
+  const msg = document.getElementById("statusMsg");
+  btn.textContent = "Stop camera";
+  btn.classList.add("stop");
+  msg.textContent = "Point the camera at the guest QR code.";
+  msg.className = "status-msg";
+
+  html5QrCode = new Html5Qrcode("reader");
+  scanning = true;
+
+  try {
+    await html5QrCode.start(
+      { facingMode:"environment" },
+      { fps:10, qrbox:{ width:240,height:240 }, aspectRatio:1, showTorchButtonIfSupported:true },
       onScanSuccess,
       () => {}
-    ).catch(() => {
-      msg.textContent = 'Camera access denied. Please allow camera in browser settings.';
-      msg.className   = 'status-msg error';
-      btn.textContent = 'Open Camera & Scan';
-      btn.classList.remove('stop');
-      scanning = false;
-    });
+    );
+  } catch (error) {
+    console.error(error);
+    msg.textContent = "Camera access failed. Allow camera access or use manual entry.";
+    msg.className = "status-msg error";
+    resetScannerButton();
   }
+}
 
-  function stopScanner() {
-    if (html5QrCode && scanning) {
-      html5QrCode.stop().then(() => {
-        scanning = false;
-        document.getElementById('startBtn').textContent = 'Open Camera & Scan';
-        document.getElementById('startBtn').classList.remove('stop');
-        document.getElementById('statusMsg').textContent = '';
-        document.getElementById('statusMsg').className   = 'status-msg';
-      });
-    }
-  }
+async function stopScanner() {
+  if (!html5QrCode || !scanning) return;
+  try { await html5QrCode.stop(); }
+  catch (error) { console.warn(error); }
+  try { await html5QrCode.clear(); }
+  catch (_) {}
+  resetScannerButton();
+}
 
-  function onScanSuccess(decodedText) {
-    stopScanner();
-    let uid = decodedText;
-    try {
-      const parsed = JSON.parse(decodedText);
-      if (parsed.uid) uid = parsed.uid;
-    } catch(e) {}
-    checkIn(uid);
-  }
+function resetScannerButton() {
+  scanning = false;
+  html5QrCode = null;
+  document.getElementById("startBtn").textContent = "Open camera & scan";
+  document.getElementById("startBtn").classList.remove("stop");
+  document.getElementById("statusMsg").textContent = "";
+}
+
+async function onScanSuccess(decodedText) {
+  await stopScanner();
+  await checkIn(decodedText);
+}
 </script>
 </body>
 </html>
